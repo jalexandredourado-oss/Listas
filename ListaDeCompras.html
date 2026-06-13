@@ -47,7 +47,7 @@
       <!-- STATUS DE LIGAÇÃO -->
       <div class="flex items-center gap-2">
         <div id="status-badge" class="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500">
-          <i data-lucide="wifi-off" class="w-3 h-3"></i>
+          <span id="status-icon-holder" class="flex items-center"><i data-lucide="wifi-off" class="w-3 h-3"></i></span>
           <span id="status-text">A ligar...</span>
         </div>
         <button onclick="openProfileModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-xl transition-all" title="Alterar Nome">
@@ -250,7 +250,7 @@
       <div class="mt-4 pt-4 border-t border-slate-100">
         <h4 class="font-bold text-xs text-slate-700 mb-1">Como usar o Código de App copiado?</h4>
         <p class="text-[11px] text-slate-400 leading-relaxed">
-          Se clicar em <strong class="text-slate-700">"Copiar Código HTML"</strong>, envie esse texto para si ou para a esposa (por exemplo, por Email ou WhatsApp). Guarde o texto num computador ou telemóvel num ficheiro terminado em <strong class="text-slate-700">.html</strong> (ex: <code class="bg-slate-50 border border-slate-200 px-1 py-0.5 rounded text-rose-600 font-mono text-[10px]">lista.html</code>) e clique para abrir! Ele vai sincronizar instantaneamente.
+          Se clicar em <strong class="text-slate-700">"Copiar Código HTML"</strong>, envie esse texto para si ou para a escolha (por exemplo, por Email ou WhatsApp). Guarde o texto num computador ou telemóvel num ficheiro terminado em <strong class="text-slate-700">.html</strong> (ex: <code class="bg-slate-50 border border-slate-200 px-1 py-0.5 rounded text-rose-600 font-mono text-[10px]">lista.html</code>) e clique para abrir! Ele vai sincronizar instantaneamente.
         </p>
       </div>
     </div>
@@ -394,7 +394,13 @@
         document.getElementById('status-badge').className = "flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100";
         document.getElementById('status-text').innerText = "Ligado";
         document.getElementById('connection-subtitle').innerText = "Sincronização Ativa";
-        document.getElementById('status-badge').querySelector('i').setAttribute('data-lucide', 'wifi');
+        
+        // CORREÇÃO: Evitar o erro ao procurar a tag 'i' alterando o seu container de forma segura
+        const iconHolder = document.getElementById('status-icon-holder');
+        if (iconHolder) {
+          iconHolder.innerHTML = '<i data-lucide="wifi" class="w-3 h-3"></i>';
+        }
+        
         lucide.createIcons();
         initListConnection();
       }
