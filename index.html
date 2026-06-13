@@ -4,94 +4,1357 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A Nossa Lista de Compras</title>
+  <!-- Tailwind CSS para Design Premium -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Fonte Moderna -->
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Ícones Lucide -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Efeitos de Celebração (Confete) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+  <script>
+    // GUARDA UMA CÓPIA DO CÓDIGO HTML LIMPO IMEDIATAMENTE ANTES DE QUALQUER MUTABILIDADE DO DOM
+    window.__pristine_html_template = "";
+    document.addEventListener("DOMContentLoaded", () => {
+      // Captura o HTML limpo inicial para exportação perfeita
+      window.__pristine_html_template = document.documentElement.outerHTML;
+    });
+  </script>
+
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .scrollbar-none::-webkit-scrollbar { display: none; }
-    .product-card:active { transform: scale(0.92); }
-    .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Ocultar barra de scroll mantendo funcionalidade */
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Animação de clique tátil nos produtos */
+    .product-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .product-card:active {
+      transform: scale(0.92);
+    }
+    /* Efeito suave de fade in */
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 pb-20 min-h-screen">
 
-  <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col">
+  <!-- APP CONTAINER -->
+  <div id="app" class="max-w-md mx-auto min-h-screen flex flex-col justify-between">
     
+    <!-- HEADER -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100 shadow-sm px-4 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="bg-emerald-600 text-white p-2.5 rounded-2xl shadow-md"><i data-lucide="shopping-bag" class="w-5 h-5"></i></div>
+        <div class="bg-emerald-600 text-white p-2.5 rounded-2xl shadow-md shadow-emerald-100 flex items-center justify-center">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+        </div>
         <div>
-          <h1 class="font-extrabold text-slate-900 text-base">A Nossa Lista</h1>
-          <p class="text-[10px] text-slate-400 flex items-center gap-1" id="connection-subtitle"><span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span> Sincronização Ativa</p>
+          <h1 class="font-extrabold text-slate-900 text-base leading-none flex items-center gap-1.5">
+            A Nossa Lista
+            <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">Sinc</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1" id="connection-subtitle">
+            <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> A carregar ligação...
+          </p>
         </div>
       </div>
-      <button onclick="openProfileModal()" class="bg-slate-100 text-slate-600 p-2 rounded-xl hover:bg-slate-200"><i data-lucide="user" class="w-4 h-4"></i></button>
+
+      <!-- STATUS DE LIGAÇÃO E OPÇÕES -->
+      <div class="flex items-center gap-1.5">
+        <!-- Badge de Status -->
+        <div id="status-badge" class="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500 transition-all">
+          <span id="status-icon-holder" class="flex items-center"><i data-lucide="wifi-off" class="w-3 h-3"></i></span>
+          <span id="status-text">A ligar...</span>
+        </div>
+        
+        <!-- Botão Configs/Sons -->
+        <button onclick="toggleAudioSettings()" id="audio-toggle-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-xl transition-all" title="Sons Ligados">
+          <i data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Botão Perfil -->
+        <button onclick="openProfileModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-xl transition-all" title="Alterar Nome">
+          <i data-lucide="user" class="w-4 h-4"></i>
+        </button>
+      </div>
     </header>
 
-    <main class="px-4 pt-4 flex-1">
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="px-4 pt-4 flex-1 pb-10">
       
-      <!-- ABAS -->
-      <div class="bg-white p-1 rounded-2xl border border-slate-200 shadow-xs mb-5 flex gap-1">
-        <button id="btn-tab-shelves" onclick="switchMainTab('shelves')" class="flex-1 py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 bg-emerald-600 text-white">
-          <i data-lucide="layout-grid" class="w-4 h-4"></i> Abastecer
-        </button>
-        <button id="btn-tab-list" onclick="switchMainTab('list')" class="flex-1 py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 text-slate-500">
-          <i data-lucide="shopping-cart" class="w-4 h-4"></i> Lista
-        </button>
-      </div>
-
-      <!-- ABA 1: ABASTECER -->
-      <div id="tab-content-shelves" class="space-y-4 animate-fade-in">
-        <section class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100">
-          <input type="text" placeholder="Pesquisar produtos..." class="w-full bg-slate-50 border rounded-2xl pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500" oninput="handleSearchInput(this.value)">
-          <div id="search-results-grid" class="grid grid-cols-3 gap-2 mt-2.5 hidden"></div>
-        </section>
-        <section class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100">
-          <div id="shelf-category-tabs" class="flex gap-2 overflow-x-auto pb-3 scrollbar-none"></div>
-          <div class="grid grid-cols-3 gap-2.5 mt-2" id="shelf-products-grid"></div>
-        </section>
-      </div>
-
-      <!-- ABA 2: LISTA -->
-      <div id="tab-content-list" class="hidden animate-fade-in space-y-4">
-        <div id="list-items-container" class="bg-white rounded-3xl border border-slate-100 p-4"></div>
-      </div>
-
-      <!-- BLOCO DE SINCRONIZAÇÃO (INTEGRADO) -->
-      <section class="bg-white rounded-3xl p-5 shadow-xs border border-slate-100 mt-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="font-bold text-sm">Sincronização</h3>
-          <span class="text-xl font-black text-slate-800" id="list-id-display">------</span>
+      <!-- CARD DE COMPARTILHAMENTO / INSTRUÇÕES -->
+      <section class="bg-gradient-to-br from-emerald-900 to-teal-950 text-white p-5 rounded-3xl shadow-lg shadow-emerald-950/20 mb-5 relative overflow-hidden">
+        <div class="relative z-10">
+          <span class="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Sincronização Ativa</span>
+          <h3 class="font-extrabold text-base mt-2 mb-1">Como usar com a Esposa?</h3>
+          <p class="text-xs text-emerald-100/80 leading-relaxed mb-4">
+            Abra a app no telemóvel dela e coloque o código da sua lista, ou partilhe diretamente tocando no botão abaixo!
+          </p>
+          <button onclick="openShareAppModal()" class="w-full bg-white hover:bg-emerald-50 text-emerald-950 font-bold py-3 px-4 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95">
+            <i data-lucide="share-2" class="w-4 h-4 text-emerald-700"></i>
+            Partilhar Lista com a Esposa
+          </button>
         </div>
+        <div class="absolute right-[-15px] bottom-[-15px] opacity-10">
+          <i data-lucide="sparkles" class="w-28 h-28"></i>
+        </div>
+      </section>
+
+      <!-- BARRA DE INFORMAÇÕES DA LISTA -->
+      <section class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100 mb-4 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Código de Sincronização</span>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <span id="list-id-display" class="text-lg font-black text-slate-800 tracking-wider">------</span>
+            <button onclick="copyCode()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-50 transition-all active:scale-90" title="Copiar código">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Artigos Comprados</span>
+          <span id="cart-progress" class="text-sm font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100/50 inline-block mt-0.5">0 / 0</span>
+        </div>
+      </section>
+
+      <!-- SELETOR DE ABAS PRINCIPAL -->
+      <div class="bg-white p-1 rounded-2xl border border-slate-200/60 shadow-xs mb-5 flex gap-1 relative z-10">
+        <button id="btn-tab-shelves" onclick="switchMainTab('shelves')" 
+          class="flex-1 py-3 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all bg-emerald-600 text-white shadow-xs">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          1. Abastecer
+        </button>
+        <button id="btn-tab-list" onclick="switchMainTab('list')" 
+          class="flex-1 py-3 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all text-slate-500 hover:text-slate-800 relative">
+          <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+          2. A Nossa Lista
+          <span id="tab-badge-count" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[9px] font-extrabold h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center border-2 border-white transition-all scale-0">0</span>
+        </button>
+      </div>
+
+      <!-- ================= ABA 1: ABASTECER (PRATELEIRAS & PESQUISA) ================= -->
+      <div id="tab-content-shelves" class="space-y-5 animate-fade-in">
+        
+        <!-- APENAS A BARRA DE PESQUISA RÁPIDA -->
+        <section class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100 transition-all">
+          <div class="relative">
+            <input type="text" id="item-name" placeholder="Pesquise produtos (ex: Pão, Leite) ou adicione um novo..." required
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+              oninput="handleSearchInput(this.value)">
+            <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-450">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+            </div>
+          </div>
+          
+          <!-- Resultados da pesquisa inteligente -->
+          <div id="search-results-grid" class="grid grid-cols-3 gap-2 mt-2.5 hidden">
+            <!-- Resultados injetados dinamicamente -->
+          </div>
+        </section>
+
+        <!-- PRATELEIRA VIRTUAL (TOQUE PARA ENVIAR PARA A LISTA) -->
+        <section class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100">
+          <div class="flex items-center justify-between mb-3.5">
+            <div class="flex items-center gap-2">
+              <i data-lucide="store" class="w-4 h-4 text-emerald-600"></i>
+              <h3 class="font-bold text-sm text-slate-850">Prateleiras Rápidas</h3>
+            </div>
+            <span class="text-[9px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-full uppercase">Toque para juntar</span>
+          </div>
+
+          <!-- Seletor de Categoria das Prateleiras -->
+          <div class="flex gap-2 overflow-x-auto pb-3 scrollbar-none" id="shelf-category-tabs">
+            <!-- Renderizado Dinamicamente -->
+          </div>
+
+          <!-- Grelha de Artigos da Prateleira Ativa -->
+          <div class="grid grid-cols-3 gap-2.5 mt-2" id="shelf-products-grid">
+            <!-- Renderizado Dinamicamente -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ================= ABA 2: A NOSSA LISTA (ARTIGOS ADICIONADOS) ================= -->
+      <div id="tab-content-list" class="space-y-4 hidden animate-fade-in">
+        
+        <!-- PROGRESS BAR -->
+        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden shadow-inner">
+          <div id="progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full w-0 transition-all duration-500 ease-out"></div>
+        </div>
+
+        <!-- LISTA DE PRODUTOS COMPLETADA / NO CARRINHO -->
+        <section class="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
+          <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div class="flex items-center gap-2">
+              <i data-lucide="shopping-basket" class="w-4 h-4 text-emerald-600"></i>
+              <h3 class="font-bold text-sm text-slate-700">Artigos Adicionados</h3>
+            </div>
+            <button id="clear-checked-btn" onclick="clearCheckedItems()" class="text-xs text-rose-600 font-extrabold hover:text-rose-700 transition flex items-center gap-1.5 hidden active:scale-95">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              Limpar Comprados
+            </button>
+          </div>
+
+          <div id="list-items-container" class="divide-y divide-slate-100">
+            <!-- Itens serão renderizados dinamicamente -->
+            <div class="p-8 text-center flex flex-col items-center justify-center text-slate-400">
+              <i data-lucide="loader" class="w-8 h-8 mb-2 opacity-50 animate-spin"></i>
+              <p class="text-xs font-medium">A carregar lista de compras conjunta...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- SUMÁRIO DE CUSTO & LIMITE ORÇAMENTAL -->
+        <div id="cost-summary" class="bg-slate-900 text-white rounded-3xl p-5 shadow-lg transition-all space-y-4 hidden">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Estimativa de Custos</h4>
+              <p class="text-xs text-slate-400 mt-0.5">Gestão de despesas em tempo real</p>
+            </div>
+            <button onclick="openBudgetModal()" class="text-[10px] bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all">
+              <i data-lucide="settings" class="w-3 h-3"></i> Limite
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold">Total Estimado</span>
+              <span id="total-estimated" class="text-xl font-black block mt-0.5">€ 0.00</span>
+            </div>
+            <div class="border-l border-slate-800 pl-4">
+              <span class="text-[10px] text-slate-400 uppercase font-bold">No Carrinho</span>
+              <span id="total-checked" class="text-xl font-black text-emerald-400 block mt-0.5">€ 0.00</span>
+            </div>
+          </div>
+
+          <!-- Barra Visual de Limite de Orçamento -->
+          <div id="budget-bar-container" class="hidden space-y-1.5 pt-1">
+            <div class="flex justify-between text-[11px] text-slate-300">
+              <span>Progresso Orçamental:</span>
+              <span id="budget-progress-text" class="font-bold">€0 / €0</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div id="budget-progress-fill" class="h-full bg-emerald-500 transition-all duration-300"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO PARA LIGAR A OUTRA LISTA -->
+      <section class="bg-white rounded-3xl p-5 border border-slate-100 shadow-xs mt-5">
+        <h3 class="font-bold text-slate-850 text-sm mb-1">Ligar-se a outra Lista</h3>
+        <p class="text-xs text-slate-400 mb-4 leading-relaxed">Já tem uma lista criada noutro telemóvel? Coloque o código respetivo para unificar os ecrãs instantaneamente.</p>
         <div class="flex gap-2">
-          <button onclick="copyCode()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-2xl text-xs">Copiar Código</button>
-          <button onclick="openShareAppModal()" class="flex-1 bg-emerald-600 text-white font-bold py-3 rounded-2xl text-xs">Partilhar</button>
+          <input type="text" id="join-code-input" placeholder="Código de 6 letras/números" maxlength="6"
+            class="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-center font-bold tracking-widest text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 flex-1">
+          <button onclick="joinOtherList()" class="bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-5 py-3 rounded-2xl text-xs transition-all active:scale-95">
+            Ligar
+          </button>
         </div>
       </section>
 
     </main>
   </div>
 
+  <!-- MODAL DE NOME (OBRIGATÓRIO / EDITA PERFIL) -->
+  <div id="name-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 animate-fade-in">
+      <h3 class="font-extrabold text-slate-900 text-lg mb-1">Como se chama?</h3>
+      <p class="text-xs text-slate-400 mb-4 leading-relaxed">Isso ajuda-vos a ver quem adicionou ou comprou cada artigo na vossa lista conjunta.</p>
+      <input type="text" id="user-name-input" placeholder="Ex: João, Amor, Rita..." required
+        class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-4">
+      <button onclick="saveUserName()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all active:scale-98">
+        Guardar Identidade
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIGURAÇÃO DE LIMITE ORÇAMENTAL -->
+  <div id="budget-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 animate-fade-in">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-extrabold text-slate-900 text-base">Limite Orçamental</h3>
+        <button onclick="closeBudgetModal()" class="text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p class="text-xs text-slate-450 mb-4 leading-relaxed">Insira o limite de gastos para esta ida ao supermercado. Deixe em branco se preferir não definir limites.</p>
+      <div class="relative mb-4">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">€</span>
+        <input type="number" id="budget-limit-input" step="5" placeholder="Ex: 50, 100, 150"
+          class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800">
+      </div>
+      <button onclick="saveBudgetLimit()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all">
+        Definir Limite Orçamental
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE EDIÇÃO DE PRODUTO -->
+  <div id="edit-item-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 animate-fade-in">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-extrabold text-slate-900 text-base">Editar Artigo</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 p-1"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      
+      <input type="hidden" id="edit-item-id">
+      
+      <div class="space-y-3.5">
+        <div>
+          <label class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Nome do Artigo</label>
+          <input type="text" id="edit-item-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Preço Unitário (€)</label>
+            <input type="number" id="edit-item-price" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Quantidade</label>
+            <input type="number" id="edit-item-qty" min="1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Categoria</label>
+          <select id="edit-item-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-emerald-500">
+            <!-- Populado dinamicamente -->
+          </select>
+        </div>
+      </div>
+
+      <button onclick="saveItemEdits()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl text-xs shadow-md transition-all mt-5">
+        Gravar Alterações
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE PARTILHA AVANÇADA (MOBILE FRIENDLY) -->
+  <div id="share-app-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto scrollbar-none">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-1.5">
+          <i data-lucide="share-2" class="w-5 h-5 text-emerald-600"></i>
+          Enviar à Esposa
+        </h3>
+        <button onclick="closeShareAppModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+        Escolha o método mais simples e seguro para partilhar a sua lista sincronizada em tempo real:
+      </p>
+
+      <div class="space-y-2.5">
+        <!-- Método Rápido: Copiar Link de Acesso com código de sincronização -->
+        <button onclick="copyShareLinkToClipboard()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 active:scale-95">
+          <i data-lucide="link" class="w-4 h-4"></i>
+          1. Copiar Link de Acesso Rápido
+        </button>
+
+        <!-- Método Offline: Copiar Código Completo do Ficheiro HTML (100% GARANTIDO NO TELEMÓVEL) -->
+        <button onclick="copyCompleteHtmlToClipboard()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-4 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 active:scale-95">
+          <i data-lucide="clipboard-copy" class="w-4 h-4"></i>
+          2. Copiar Código HTML do App (Ficheiro)
+        </button>
+
+        <!-- Método 3: Descarregar Ficheiro Directamente -->
+        <button onclick="triggerDownloadDirect()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 active:scale-95">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          3. Descarregar Ficheiro para o Telemóvel
+        </button>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <h4 class="font-bold text-xs text-slate-700 mb-1">Como utilizar?</h4>
+        <p class="text-[11px] text-slate-400 leading-relaxed mb-1.5">
+          👉 <strong>Link Rápido:</strong> Ideal se ela aceder a partir do browser normal. Ao abrir, a lista dela junta-se à sua.
+        </p>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          👉 <strong>Código HTML:</strong> Envie o texto copiado por WhatsApp ou E-mail. Ela só precisa de colar numa nota ou guardar como ficheiro <code class="bg-slate-50 border border-slate-200 px-1 py-0.5 rounded text-rose-600 font-mono text-[10px]">compras.html</code> para ter a app guardada para sempre!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICADOR -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 max-w-xs transition-all duration-300 opacity-0 pointer-events-none">
+    <i data-lucide="info" id="toast-icon" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-message">Mensagem da lista</span>
+  </div>
+
+  <!-- CORE SCRIPT IMPORTANTE (MANTÉM CONFIG E ADICIONA OFFLINE GRACEFUL FALLBACK) -->
   <script type="module">
-    // Lógica principal mantida
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // -----------------------------------------------------------------
+    // SEGURANÇA LOCALSTORAGE (EVITA TRAVAMENTO EM TELEMÓVEL / IFRAME)
+    // -----------------------------------------------------------------
+    const safeStorage = {
+      getItem(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch (e) {
+          console.warn("Acesso ao localStorage bloqueado pelo browser/iframe:", e);
+          return null;
+        }
+      },
+      setItem(key, value) {
+        try {
+          localStorage.setItem(key, value);
+        } catch (e) {
+          console.warn("Escrita no localStorage bloqueada pelo browser/iframe:", e);
+        }
+      }
+    };
+
+    // -----------------------------------------------------------------
+    // SEGURANÇA E AUTO-CONFIGURAÇÃO DO SANDBOX
+    // -----------------------------------------------------------------
+    const EMBEDDED_CONFIG = null;
+    const EMBEDDED_APP_ID = null;
+    const EMBEDDED_AUTH_TOKEN = null;
+
+    const envFirebaseConfig = window.__firebase_config ? JSON.parse(window.__firebase_config) : null;
+    const envAppId = window.__app_id || 'default-app-id';
+    const envAuthToken = window.__initial_auth_token || '';
+
+    const firebaseConfig = EMBEDDED_CONFIG || envFirebaseConfig;
+    const appId = EMBEDDED_APP_ID || envAppId;
+    const authToken = EMBEDDED_AUTH_TOKEN || envAuthToken;
+
+    let isOfflineMode = false;
+    let app, auth, db;
+
+    // Inicialização Firebase segura com Graceful Fallback (Se der erro ou não houver config, liga o modo local)
+    try {
+      if (firebaseConfig && firebaseConfig.apiKey) {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+      } else {
+        throw new Error("Configuração Firebase ausente. Ativar modo local.");
+      }
+    } catch (e) {
+      console.warn("Firebase não pôde inicializar. Entrando em Modo Local Offline:", e);
+      isOfflineMode = true;
+    }
+
+    // Variáveis Globais de Estado
+    let user = null;
+    let listId = '';
+    let listData = { items: [], budgetLimit: null };
+    let shelfActiveCategory = 'frutas_legumes'; // Categoria inicial da prateleira rápida
+    let userName = safeStorage.getItem('shopping_user_name') || '';
+    let currentActiveTab = 'shelves'; // Controla qual aba está ativa ('shelves' ou 'list')
+    let soundEnabled = safeStorage.getItem('shopping_sound_enabled') !== 'false'; // Padrão é true
+
+    // Dados de Apoio de Categorias
+    const CATEGORIES = [
+      { id: 'frutas_legumes', name: 'Frutas e Legumes', icon: '🍎' },
+      { id: 'talho_peixaria', name: 'Talho & Peixaria', icon: '🥩' },
+      { id: 'padaria', name: 'Padaria & Pastelaria', icon: '🍞' },
+      { id: 'laticinios_charcutaria', name: 'Laticínios & Frios', icon: '🧀' },
+      { id: 'mercearia', name: 'Mercearia', icon: '🥫' },
+      { id: 'bebidas', name: 'Bebidas', icon: '🥤' },
+      { id: 'higiene', name: 'Higiene & Beleza', icon: '🧼' },
+      { id: 'limpeza', name: 'Limpeza Lar', icon: '🧹' },
+      { id: 'outros', name: 'Outros', icon: '📦' }
+    ];
+
+    // Grelha de Artigos da Prateleira Rápida
+    const PANTRY_SHELVES = [
+      // Frutas e Legumes
+      { name: 'Bananas', category: 'frutas_legumes', icon: '🍌' },
+      { name: 'Maçãs', category: 'frutas_legumes', icon: '🍎' },
+      { name: 'Tomates', category: 'frutas_legumes', icon: '🍅' },
+      { name: 'Alface', category: 'frutas_legumes', icon: '🥬' },
+      { name: 'Batatas', category: 'frutas_legumes', icon: '🥔' },
+      { name: 'Cenouras', category: 'frutas_legumes', icon: '🥕' },
+      
+      // Talho e Peixaria
+      { name: 'Bifinhos Frango', category: 'talho_peixaria', icon: '🍗' },
+      { name: 'Carne Picada', category: 'talho_peixaria', icon: '🥩' },
+      { name: 'Postas Bacalhau', category: 'talho_peixaria', icon: '🐟' },
+      { name: 'Salsichas', category: 'talho_peixaria', icon: '🌭' },
+
+      // Padaria
+      { name: 'Pão de Mistura', category: 'padaria', icon: '🍞' },
+      { name: 'Carcaças', category: 'padaria', icon: '🥖' },
+      { name: 'Croissants', category: 'padaria', icon: '🥐' },
+      { name: 'Pastéis de Nata', category: 'padaria', icon: '🧁' },
+
+      // Laticínios e Charcutaria
+      { name: 'Leite Gordo', category: 'laticinios_charcutaria', icon: '🥛' },
+      { name: 'Queijo Fatiado', category: 'laticinios_charcutaria', icon: '🧀' },
+      { name: 'Fiambre Peru', category: 'laticinios_charcutaria', icon: '🍖' },
+      { name: 'Ovos', category: 'laticinios_charcutaria', icon: '🥚' },
+      { name: 'Iogurtes', category: 'laticinios_charcutaria', icon: '🍶' },
+      { name: 'Manteiga', category: 'laticinios_charcutaria', icon: '🧈' },
+
+      // Mercearia
+      { name: 'Arroz', category: 'mercearia', icon: '🍚' },
+      { name: 'Massa', category: 'mercearia', icon: '🍝' },
+      { name: 'Café', category: 'mercearia', icon: '☕' },
+      { name: 'Azeite', category: 'mercearia', icon: '🫗' },
+      { name: 'Açúcar', category: 'mercearia', icon: '🍬' },
+      { name: 'Bolachas', category: 'mercearia', icon: '🍪' },
+
+      // Bebidas
+      { name: 'Água das Pedras', category: 'bebidas', icon: '💧' },
+      { name: 'Refrigerante', category: 'bebidas', icon: '🥤' },
+      { name: 'Cerveja', category: 'bebidas', icon: '🍺' },
+      { name: 'Garrafa Vinho', category: 'bebidas', icon: '🍷' },
+
+      // Higiene
+      { name: 'Gel Duche', category: 'higiene', icon: '🧴' },
+      { name: 'Papel Higiénico', category: 'higiene', icon: '🧻' },
+      { name: 'Champô', category: 'higiene', icon: '🧼' },
+      { name: 'Pasta de Dentes', category: 'higiene', icon: '🪥' },
+
+      // Limpeza Lar
+      { name: 'Detergente Roupa', category: 'limpeza', icon: '🧹' },
+      { name: 'Detergente Loiça', category: 'limpeza', icon: '🧼' },
+      { name: 'Lixívia', category: 'limpeza', icon: '🧪' },
+      { name: 'Sacos do Lixo', category: 'limpeza', icon: '🗑️' }
+    ];
+
+    // Som de feedback para check-out de item
+    const playTickSound = () => {
+      if (!soundEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      } catch (e) {
+        // Ignora erros de AudioContext do browser
+      }
+    };
+
+    // Feedback tátil com vibração do smartphone
+    const triggerHapticFeedback = () => {
+      if (navigator.vibrate) {
+        navigator.vibrate(35); // Curta vibração tátil premium
+      }
+    };
+
+    // Liga/Desliga Sons e atualiza interface
+    window.toggleAudioSettings = () => {
+      soundEnabled = !soundEnabled;
+      safeStorage.setItem('shopping_sound_enabled', soundEnabled);
+      updateAudioToggleUI();
+      window.showToast(soundEnabled ? "Sons ativados!" : "Sons silenciados.");
+    };
+
+    function updateAudioToggleUI() {
+      const btn = document.getElementById('audio-toggle-btn');
+      if (soundEnabled) {
+        btn.innerHTML = '<i data-lucide="volume-2" class="w-4 h-4"></i>';
+        btn.className = "bg-slate-100 hover:bg-slate-200 text-slate-600 p-2 rounded-xl transition-all";
+      } else {
+        btn.innerHTML = '<i data-lucide="volume-x" class="w-4 h-4"></i>';
+        btn.className = "bg-rose-50 hover:bg-rose-100 text-rose-500 p-2 rounded-xl transition-all";
+      }
+      lucide.createIcons();
+    }
+
+    // Alerta em Balão (Toast) Premium
+    window.showToast = function(msg, iconType = "info") {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+      
+      toastMsg.innerText = msg;
+      
+      // Personalização rápida de ícones para feedback visual refinado
+      if (iconType === "success") {
+        toastIcon.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>';
+      } else {
+        toastIcon.innerHTML = '<i data-lucide="info" class="w-4 h-4 text-emerald-400"></i>';
+      }
+      
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      
+      lucide.createIcons();
+      
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
+    };
+
+    // Alternador de Abas Principais
     window.switchMainTab = function(tabId) {
-      ['shelves', 'list'].forEach(id => {
-        const content = document.getElementById(`tab-content-${id}`);
-        const btn = document.getElementById(`btn-tab-${id}`);
-        if (id === tabId) {
-          content.classList.remove('hidden');
-          btn.className = "flex-1 py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 bg-emerald-600 text-white";
+      currentActiveTab = tabId;
+      const btnShelves = document.getElementById('btn-tab-shelves');
+      const btnList = document.getElementById('btn-tab-list');
+      const contentShelves = document.getElementById('tab-content-shelves');
+      const contentList = document.getElementById('tab-content-list');
+
+      if (tabId === 'shelves') {
+        btnShelves.className = "flex-1 py-3 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all bg-emerald-600 text-white shadow-xs";
+        btnList.className = "flex-1 py-3 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all text-slate-500 hover:text-slate-800 relative";
+        contentShelves.classList.remove('hidden');
+        contentList.classList.add('hidden');
+      } else {
+        btnShelves.className = "flex-1 py-3 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all text-slate-500 hover:text-slate-800";
+        btnList.className = "flex-1 py-3 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all bg-emerald-600 text-white shadow-xs relative";
+        contentShelves.classList.add('hidden');
+        contentList.classList.remove('hidden');
+      }
+    };
+
+    // Autenticação Firebase
+    const initAuth = async () => {
+      if (isOfflineMode) {
+        setupOfflineConnection();
+        return;
+      }
+      try {
+        if (authToken) {
+          await signInWithCustomToken(auth, authToken);
         } else {
-          content.classList.add('hidden');
-          btn.className = "flex-1 py-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 text-slate-500";
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth falhou, a tentar novamente offline:", err);
+        setupOfflineConnection();
+      }
+    };
+
+    // Listener de Autenticação Firebase
+    if (!isOfflineMode) {
+      onAuthStateChanged(auth, (u) => {
+        user = u;
+        if (user) {
+          document.getElementById('status-badge').className = "flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100";
+          document.getElementById('status-text').innerText = "Ligado";
+          document.getElementById('connection-subtitle').innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span> Sincronização Ativa';
+          
+          const iconHolder = document.getElementById('status-icon-holder');
+          if (iconHolder) {
+            iconHolder.innerHTML = '<i data-lucide="wifi" class="w-3 h-3"></i>';
+          }
+          
+          lucide.createIcons();
+          initListConnection();
         }
       });
+    }
+
+    // Inicialização do Modo Local Offline (Sem Banco de Dados Cloud)
+    function setupOfflineConnection() {
+      isOfflineMode = true;
+      document.getElementById('status-badge').className = "flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100";
+      document.getElementById('status-text').innerText = "Modo Local";
+      document.getElementById('connection-subtitle').innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-rose-500"></span> Modo Offline Permanente';
+      
+      const iconHolder = document.getElementById('status-icon-holder');
+      if (iconHolder) {
+        iconHolder.innerHTML = '<i data-lucide="wifi-off" class="w-3 h-3"></i>';
+      }
+      
+      lucide.createIcons();
+      initListConnection();
+    }
+
+    // Inicialização da Lista de Sincronização (Local ou Remota)
+    function initListConnection() {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && hash.length === 6) {
+        listId = hash.toUpperCase();
+      } else {
+        listId = safeStorage.getItem('active_shopping_list_id');
+        if (!listId) {
+          listId = Math.random().toString(36).substring(2, 8).toUpperCase();
+          safeStorage.setItem('active_shopping_list_id', listId);
+        }
+        window.location.hash = listId;
+      }
+
+      document.getElementById('list-id-display').innerText = listId;
+
+      if (isOfflineMode) {
+        // Obter do LocalStorage
+        const localData = safeStorage.getItem(`offline_list_${listId}`);
+        if (localData) {
+          listData = JSON.parse(localData);
+        } else {
+          listData = { id: listId, name: 'A Nossa Lista', updatedAt: Date.now(), items: [], budgetLimit: null };
+        }
+        renderItems();
+        buildShelfProducts();
+      } else {
+        // Sincronizar em Tempo Real no Firestore
+        const listDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'lists', listId);
+        
+        onSnapshot(listDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            listData = docSnap.data();
+            if (!listData.items) listData.items = [];
+          } else {
+            listData = { id: listId, name: 'A Nossa Lista', updatedAt: Date.now(), items: [], budgetLimit: null };
+            setDoc(listDocRef, listData);
+          }
+          renderItems();
+          buildShelfProducts();
+        }, (err) => {
+          console.error("Erro na escuta do Firestore:", err);
+          setupOfflineConnection();
+        });
+      }
+    }
+
+    // Gravar dados atualizados no Firebase ou LocalStorage
+    async function saveListToFirebase() {
+      listData.updatedAt = Date.now();
+      
+      if (isOfflineMode) {
+        safeStorage.setItem(`offline_list_${listId}`, JSON.stringify(listData));
+        renderItems();
+        buildShelfProducts();
+        return;
+      }
+      
+      if (!user || !listId) return;
+      try {
+        const listDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'lists', listId);
+        await setDoc(listDocRef, listData);
+      } catch (err) {
+        window.showToast("Falha ao salvar. Guardado localmente!");
+      }
+    }
+
+    // Renderizar Grelha de Artigos das Prateleiras
+    window.selectShelfCategory = function(catId) {
+      shelfActiveCategory = catId;
+      buildShelfCategoryTabs();
+      buildShelfProducts();
     };
-    window.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+
+    function buildShelfCategoryTabs() {
+      const container = document.getElementById('shelf-category-tabs');
+      if (!container) return;
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = cat.id === shelfActiveCategory;
+        return `
+          <button type="button" onclick="selectShelfCategory('${cat.id}')"
+            class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl text-xs font-semibold border transition-all ${isActive ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200'}">
+            <span>${cat.icon}</span>
+            <span>${cat.name}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Desenhar produtos das prateleiras rápidas
+    function buildShelfProducts() {
+      const container = document.getElementById('shelf-products-grid');
+      if (!container) return;
+      const products = PANTRY_SHELVES.filter(p => p.category === shelfActiveCategory);
+
+      container.innerHTML = products.map(prod => {
+        const listItem = (listData.items || []).find(i => i.name === `${prod.icon} ${prod.name}` && !i.checked);
+        const qtyInList = listItem ? listItem.qty : 0;
+
+        return `
+          <button type="button" onclick="addPantryItemToShoppingList('${prod.name}', '${prod.category}', '${prod.icon}')"
+            class="product-card relative flex flex-col items-center justify-center p-3 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-2xl text-center">
+            
+            <!-- Badge de quantidade ativa -->
+            ${qtyInList > 0 ? `
+              <span class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[9px] font-extrabold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center border border-white">
+                ${qtyInList}x
+              </span>
+            ` : ''}
+
+            <span class="text-3xl mb-1 select-none">${prod.icon}</span>
+            <span class="text-[11px] font-bold text-slate-700 leading-tight">${prod.name}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Ação ao clicar no ícone: adiciona ou incrementa quantidade diretamente!
+    window.addPantryItemToShoppingList = function(name, category, icon) {
+      triggerHapticFeedback();
+      const fullName = `${icon} ${name}`;
+      if (!listData.items) listData.items = [];
+      const existingItem = listData.items.find(i => i.name === fullName && !i.checked);
+
+      if (existingItem) {
+        existingItem.qty += 1;
+        window.showToast(`Adicionado: +1 "${name}"`, "success");
+      } else {
+        const newItem = {
+          id: crypto.randomUUID(),
+          name: fullName,
+          category: category,
+          qty: 1,
+          price: null,
+          checked: false,
+          addedBy: userName || 'Alguém',
+          addedAt: Date.now()
+        };
+        listData.items.unshift(newItem);
+        window.showToast(`"${name}" adicionado à lista!`, "success");
+      }
+
+      saveListToFirebase();
+
+      // Limpar a barra de pesquisa rápida de imediato para nova utilização
+      const nameInput = document.getElementById('item-name');
+      if (nameInput) nameInput.value = '';
+      const resultsGrid = document.getElementById('search-results-grid');
+      if (resultsGrid) {
+        resultsGrid.classList.add('hidden');
+        resultsGrid.innerHTML = '';
+      }
+    };
+
+    // Adicionar um artigo personalizado diretamente a partir do texto escrito na pesquisa
+    window.addCustomItemFromSearch = function(name) {
+      triggerHapticFeedback();
+      const newItem = {
+        id: crypto.randomUUID(),
+        name: name,
+        category: 'outros', // Categoria padrão (Outros)
+        qty: 1,
+        price: null,
+        checked: false,
+        addedBy: userName || 'Alguém',
+        addedAt: Date.now()
+      };
+
+      if (!listData.items) listData.items = [];
+      listData.items.unshift(newItem);
+      saveListToFirebase();
+
+      // Limpar campo de pesquisa
+      const nameInput = document.getElementById('item-name');
+      if (nameInput) nameInput.value = '';
+      const resultsGrid = document.getElementById('search-results-grid');
+      if (resultsGrid) {
+        resultsGrid.classList.add('hidden');
+        resultsGrid.innerHTML = '';
+      }
+
+      window.showToast(`"${name}" adicionado à lista!`, "success");
+    };
+
+    // Lógica de pesquisa inteligente de produtos cadastrados com adição rápida
+    window.handleSearchInput = function(query) {
+      const resultsGrid = document.getElementById('search-results-grid');
+      if (!query || query.trim() === '') {
+        resultsGrid.classList.add('hidden');
+        resultsGrid.innerHTML = '';
+        return;
+      }
+
+      const cleanQuery = query.toLowerCase().trim();
+      const filtered = PANTRY_SHELVES.filter(p => p.name.toLowerCase().includes(cleanQuery));
+
+      let gridHtml = '';
+
+      if (filtered.length > 0) {
+        resultsGrid.classList.remove('hidden');
+        gridHtml = filtered.map(prod => {
+          const listItem = (listData.items || []).find(i => i.name === `${prod.icon} ${prod.name}` && !i.checked);
+          const qtyInList = listItem ? listItem.qty : 0;
+
+          return `
+            <button type="button" onclick="addPantryItemToShoppingList('${prod.name}', '${prod.category}', '${prod.icon}')"
+              class="product-card relative flex flex-col items-center justify-center p-2.5 bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/50 rounded-2xl text-center transition-all animate-fade-in">
+              ${qtyInList > 0 ? `
+                <span class="absolute -top-1 -right-1 bg-emerald-500 text-white text-[9px] font-extrabold h-4.5 min-w-[18px] px-1 rounded-full flex items-center justify-center border border-white">
+                  ${qtyInList}
+                </span>
+              ` : ''}
+              <span class="text-xl mb-0.5 select-none">${prod.icon}</span>
+              <span class="text-[10px] font-bold text-slate-700 leading-tight">${prod.name}</span>
+            </button>
+          `;
+        }).join('');
+      }
+
+      // Adiciona sempre o botão dinâmico para criar um item personalizado com o texto introduzido
+      const exactMatch = PANTRY_SHELVES.find(p => p.name.toLowerCase() === cleanQuery);
+      if (!exactMatch) {
+        resultsGrid.classList.remove('hidden');
+        gridHtml += `
+          <button type="button" onclick="addCustomItemFromSearch('${query.replace(/'/g, "\\'")}')"
+            class="product-card col-span-3 flex items-center justify-center gap-2 p-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-2xl text-xs transition-all mt-2.5 shadow-xs">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Adicionar "${query}" personalizado
+          </button>
+        `;
+      }
+
+      resultsGrid.innerHTML = gridHtml;
+      lucide.createIcons();
+    };
+
+    // Renderizar Lista Activa
+    function renderItems() {
+      const container = document.getElementById('list-items-container');
+      const clearBtn = document.getElementById('clear-checked-btn');
+      if (!container) return;
+      
+      let uncheckedCount = 0;
+      let totalEst = 0;
+      let totalChecked = 0;
+      let checkedCount = 0;
+      const items = listData.items || [];
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center flex flex-col items-center justify-center text-slate-400">
+            <div class="bg-slate-50 p-4 rounded-3xl text-slate-450 mb-3 border border-slate-100">
+              <i data-lucide="shopping-basket" class="w-8 h-8 text-slate-400"></i>
+            </div>
+            <h4 class="font-bold text-slate-700 text-sm">A lista está vazia!</h4>
+            <p class="text-xs mt-1 max-w-xs text-slate-400">Adicione artigos usando o campo de pesquisa ou tocando nas prateleiras rápidas.</p>
+          </div>
+        `;
+        clearBtn.classList.add('hidden');
+        document.getElementById('cost-summary').classList.add('hidden');
+        document.getElementById('cart-progress').innerText = "0 / 0";
+        document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('tab-badge-count').classList.add('scale-0');
+        lucide.createIcons();
+        return;
+      }
+
+      // Agrupar itens por categoria ativa
+      const grouped = {};
+      items.forEach(item => {
+        if (!item.checked) {
+          uncheckedCount++;
+        } else {
+          checkedCount++;
+        }
+        if (!grouped[item.category]) {
+          grouped[item.category] = [];
+        }
+        grouped[item.category].push(item);
+      });
+
+      // Atualizar o badge dinâmico da Aba 2 (A nossa lista)
+      const tabBadge = document.getElementById('tab-badge-count');
+      if (uncheckedCount > 0) {
+        tabBadge.innerText = uncheckedCount;
+        tabBadge.classList.remove('scale-0');
+      } else {
+        tabBadge.classList.add('scale-0');
+      }
+
+      let html = '';
+
+      CATEGORIES.forEach(cat => {
+        if (grouped[cat.id] && grouped[cat.id].length > 0) {
+          html += `
+            <div class="p-4 bg-white animate-fade-in">
+              <div class="flex items-center gap-1.5 mb-3">
+                <span class="text-base">${cat.icon}</span>
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">${cat.name}</span>
+                <span class="bg-slate-50 text-slate-500 font-bold text-[9px] px-2 py-0.5 rounded-full ml-auto">
+                  ${grouped[cat.id].length} ${grouped[cat.id].length === 1 ? 'artigo' : 'artigos'}
+                </span>
+              </div>
+              <div class="space-y-2">
+          `;
+
+          grouped[cat.id].forEach(item => {
+            const isChecked = item.checked;
+            if (isChecked) {
+              if (item.price) totalChecked += (item.price * item.qty);
+            }
+            if (item.price) totalEst += (item.price * item.qty);
+
+            html += `
+              <div class="flex items-center justify-between p-3 rounded-2xl border transition-all ${isChecked ? 'bg-slate-50/70 border-slate-200/50 opacity-60' : 'bg-white border-slate-200 hover:shadow-sm'}">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <button type="button" onclick="toggleItemCheck('${item.id}')" class="flex-shrink-0 text-slate-400 hover:text-emerald-600 transition-colors">
+                    <i data-lucide="${isChecked ? 'check-square' : 'square'}" class="w-5 h-5 ${isChecked ? 'text-emerald-600' : ''}"></i>
+                  </button>
+                  <div class="min-w-0 flex-1 cursor-pointer" onclick="toggleItemCheck('${item.id}')">
+                    <p class="text-sm font-semibold truncate text-slate-800 ${isChecked ? 'line-through text-slate-450' : ''}">
+                      ${item.name}
+                    </p>
+                    <div class="flex items-center gap-1.5 mt-0.5 text-[9px] text-slate-400">
+                      <span>Autor: ${item.addedBy}</span>
+                      ${item.price ? `<span>•</span><span class="text-emerald-600 font-bold">€ ${(item.price * item.qty).toFixed(2)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-2 ml-2">
+                  <div class="flex items-center gap-1 bg-slate-50 p-0.5 rounded-xl border border-slate-200/40">
+                    <button onclick="adjustItemQty('${item.id}', -1)" class="p-1 hover:bg-white rounded-lg text-slate-500 transition-all active:scale-90">
+                      <i data-lucide="minus" class="w-2.5 h-2.5"></i>
+                    </button>
+                    <span class="text-xs font-bold px-1 min-w-[14px] text-center">${item.qty}</span>
+                    <button onclick="adjustItemQty('${item.id}', 1)" class="p-1 hover:bg-white rounded-lg text-slate-500 transition-all active:scale-90">
+                      <i data-lucide="plus" class="w-2.5 h-2.5"></i>
+                    </button>
+                  </div>
+                  
+                  <!-- Editar -->
+                  <button onclick="openEditModal('${item.id}')" class="text-slate-300 hover:text-emerald-600 p-1.5 rounded-xl hover:bg-emerald-50 transition-all">
+                    <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                  </button>
+
+                  <!-- Apagar -->
+                  <button onclick="deleteItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-xl hover:bg-rose-50 transition-all">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+
+          html += `</div></div>`;
+        }
+      });
+
+      container.innerHTML = html;
+
+      // Atualiza progresso das compras
+      document.getElementById('cart-progress').innerText = `${checkedCount} de ${items.length}`;
+      const progressPercent = Math.round((checkedCount / items.length) * 100);
+      document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+      // Se acabou de completar a lista inteira, solta confetes!
+      if (checkedCount === items.length && items.length > 0 && uncheckedCount === 0) {
+        triggerSuccessCelebration();
+      }
+
+      if (checkedCount > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+
+      // Sumário de custos
+      if (totalEst > 0 || listData.budgetLimit) {
+        document.getElementById('cost-summary').classList.remove('hidden');
+        document.getElementById('total-estimated').innerText = `€ ${totalEst.toFixed(2)}`;
+        document.getElementById('total-checked').innerText = `€ ${totalChecked.toFixed(2)}`;
+        
+        // Atualiza UI de Orçamento se limite existir
+        const budgetBar = document.getElementById('budget-bar-container');
+        if (listData.budgetLimit) {
+          budgetBar.classList.remove('hidden');
+          document.getElementById('budget-progress-text').innerText = `€ ${totalEst.toFixed(2)} / € ${parseFloat(listData.budgetLimit).toFixed(2)}`;
+          
+          const limitPercent = Math.min(100, (totalEst / listData.budgetLimit) * 100);
+          const fill = document.getElementById('budget-progress-fill');
+          fill.style.width = `${limitPercent}%`;
+          
+          // Alterar cor da barra orçamental consoante consumo
+          if (limitPercent >= 100) {
+            fill.className = "h-full bg-rose-500 transition-all duration-300";
+            window.showToast("Alerta: Orçamento estipulado ultrapassado!");
+          } else if (limitPercent > 80) {
+            fill.className = "h-full bg-amber-500 transition-all duration-300";
+          } else {
+            fill.className = "h-full bg-emerald-500 transition-all duration-300";
+          }
+        } else {
+          budgetBar.classList.add('hidden');
+        }
+      } else {
+        document.getElementById('cost-summary').classList.add('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    // Comemora a finalização da lista com efeito Confete
+    let lastCelebratedListId = "";
+    function triggerSuccessCelebration() {
+      if (lastCelebratedListId === listId + "_" + listData.updatedAt) return; 
+      lastCelebratedListId = listId + "_" + listData.updatedAt;
+      
+      triggerHapticFeedback();
+      if (soundEnabled) {
+        playTickSound();
+        setTimeout(playTickSound, 150);
+      }
+      
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      
+      window.showToast("Excelente! Compra concluída com sucesso!", "success");
+    }
+
+    // Riscar e Comprar Item
+    window.toggleItemCheck = function(itemId) {
+      triggerHapticFeedback();
+      listData.items = (listData.items || []).map(item => {
+        if (item.id === itemId) {
+          const newChecked = !item.checked;
+          if (newChecked) playTickSound();
+          return { ...item, checked: newChecked };
+        }
+        return item;
+      });
+      saveListToFirebase();
+    };
+
+    window.adjustItemQty = function(itemId, change) {
+      listData.items = (listData.items || []).map(item => {
+        if (item.id === itemId) {
+          return { ...item, qty: Math.max(1, item.qty + change) };
+        }
+        return item;
+      });
+      saveListToFirebase();
+    };
+
+    window.deleteItem = function(itemId) {
+      listData.items = (listData.items || []).filter(item => item.id !== itemId);
+      saveListToFirebase();
+    };
+
+    window.clearCheckedItems = function() {
+      listData.items = (listData.items || []).filter(item => !item.checked);
+      saveListToFirebase();
+      window.showToast("Carrinho esvaziado!", "success");
+    };
+
+    // Unir-se a outra lista existente
+    window.joinOtherList = function() {
+      const codeInput = document.getElementById('join-code-input').value.trim().toUpperCase();
+      if (codeInput.length !== 6) {
+        window.showToast("O código de acesso tem de ter exatamente 6 letras/números.");
+        return;
+      }
+      listId = codeInput;
+      safeStorage.setItem('active_shopping_list_id', codeInput);
+      window.location.hash = codeInput;
+      document.getElementById('join-code-input').value = '';
+      initListConnection();
+      window.showToast(`Conectado à lista: ${codeInput}!`, "success");
+    };
+
+    window.copyCode = function() {
+      const el = document.createElement('textarea');
+      el.value = listId;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      window.showToast("Código da lista copiado!");
+    };
+
+    // Controle do Orçamento Limite
+    window.openBudgetModal = function() {
+      document.getElementById('budget-limit-input').value = listData.budgetLimit || '';
+      document.getElementById('budget-modal').classList.remove('hidden');
+    };
+
+    window.closeBudgetModal = function() {
+      document.getElementById('budget-modal').classList.add('hidden');
+    };
+
+    window.saveBudgetLimit = function() {
+      const val = document.getElementById('budget-limit-input').value.trim();
+      listData.budgetLimit = val ? parseFloat(val) : null;
+      saveListToFirebase();
+      closeBudgetModal();
+      window.showToast("Limite de orçamento definido!", "success");
+    };
+
+    // Edição Avançada de Produtos
+    window.openEditModal = function(itemId) {
+      const item = (listData.items || []).find(i => i.id === itemId);
+      if (!item) return;
+      
+      document.getElementById('edit-item-id').value = item.id;
+      document.getElementById('edit-item-name').value = item.name;
+      document.getElementById('edit-item-price').value = item.price || '';
+      document.getElementById('edit-item-qty').value = item.qty;
+      
+      const catSelector = document.getElementById('edit-item-category');
+      catSelector.innerHTML = CATEGORIES.map(c => `
+        <option value="${c.id}" ${c.id === item.category ? 'selected' : ''}>${c.icon} ${c.name}</option>
+      `).join('');
+      
+      document.getElementById('edit-item-modal').classList.remove('hidden');
+    };
+
+    window.closeEditModal = function() {
+      document.getElementById('edit-item-modal').classList.add('hidden');
+    };
+
+    window.saveItemEdits = function() {
+      const id = document.getElementById('edit-item-id').value;
+      const name = document.getElementById('edit-item-name').value.trim();
+      const price = document.getElementById('edit-item-price').value;
+      const qty = document.getElementById('edit-item-qty').value;
+      const category = document.getElementById('edit-item-category').value;
+
+      listData.items = (listData.items || []).map(item => {
+        if (item.id === id) {
+          return {
+            ...item,
+            name: name,
+            price: price ? parseFloat(price) : null,
+            qty: parseInt(qty) || 1,
+            category: category
+          };
+        }
+        return item;
+      });
+
+      saveListToFirebase();
+      closeEditModal();
+      window.showToast("Artigo atualizado com sucesso!", "success");
+    };
+
+    // Gestão do Menu de Partilha
+    window.openShareAppModal = function() {
+      document.getElementById('share-app-modal').classList.remove('hidden');
+    };
+
+    window.closeShareAppModal = function() {
+      document.getElementById('share-app-modal').classList.add('hidden');
+    };
+
+    // Copiar Link Direto para a outra pessoa
+    window.copyShareLinkToClipboard = function() {
+      const shareUrl = window.location.origin + window.location.pathname + "#" + listId;
+      const el = document.createElement('textarea');
+      el.value = shareUrl;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      window.showToast("Link de acesso copiado!");
+      closeShareAppModal();
+    };
+
+    // Obter String HTML do App Formatado para Exportação (Limpo e Funcional)
+    window.getGeneratedHtmlString = function() {
+      let pristine = window.__pristine_html_template || document.documentElement.outerHTML;
+      
+      const actualConfig = JSON.stringify(firebaseConfig);
+      const actualAppId = appId;
+      const actualToken = authToken;
+
+      let finalHtml = "<!DOCTYPE html>\n<html lang=\"pt\">\n" + pristine + "\n</html>";
+      
+      // Realiza a injeção perfeita das configurações de rede para o standalone
+      finalHtml = finalHtml.replace('const EMBEDDED_CONFIG = null;', `const EMBEDDED_CONFIG = ${actualConfig};`);
+      finalHtml = finalHtml.replace('const EMBEDDED_APP_ID = null;', `const EMBEDDED_APP_ID = "${actualAppId}";`);
+      finalHtml = finalHtml.replace('const EMBEDDED_AUTH_TOKEN = null;', `const EMBEDDED_AUTH_TOKEN = "${actualToken}";`);
+      
+      return finalHtml;
+    };
+
+    // Copiar código do ficheiro HTML limpo inteiro (Garante transferência offline 100% livre de estado)
+    window.copyCompleteHtmlToClipboard = function() {
+      try {
+        const fullHtml = window.getGeneratedHtmlString();
+        const el = document.createElement('textarea');
+        el.value = fullHtml;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        window.showToast("Código limpo do ficheiro copiado!");
+        closeShareAppModal();
+      } catch (err) {
+        window.showToast("Falha ao copiar código automaticamente!");
+      }
+    };
+
+    window.triggerDownloadDirect = function() {
+      downloadStandaloneApp();
+      closeShareAppModal();
+    };
+
+    // Descarregar ficheiro HTML limpo e independente
+    window.downloadStandaloneApp = function() {
+      try {
+        const finalHtml = window.getGeneratedHtmlString();
+        const blob = new Blob([finalHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Lista_de_Compras_${listId}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        window.showToast("Ficheiro descarregado!");
+      } catch (err) {
+        window.showToast("Erro ao descarregar o ficheiro!");
+      }
+    };
+
+    // Controle do Nome do Utilizador
+    window.openProfileModal = function() {
+      document.getElementById('user-name-input').value = userName;
+      document.getElementById('name-modal').classList.remove('hidden');
+    };
+
+    window.saveUserName = function() {
+      const nameVal = document.getElementById('user-name-input').value.trim();
+      if (!nameVal) return;
+      userName = nameVal;
+      safeStorage.setItem('shopping_user_name', nameVal);
+      document.getElementById('name-modal').classList.add('hidden');
+      window.showToast(`Identidade guardada: ${nameVal}!`, "success");
+      
+      // Atualizar itens na tela para mostrar o autor correto
+      renderItems();
+    };
+
+    // Inicialização da Aplicação
+    window.addEventListener('DOMContentLoaded', () => {
+      buildShelfCategoryTabs();
+      buildShelfProducts();
+      updateAudioToggleUI();
+      lucide.createIcons();
+      initAuth();
+
+      if (!userName) {
+        document.getElementById('name-modal').classList.remove('hidden');
+      }
+    });
   </script>
 </body>
 </html>
