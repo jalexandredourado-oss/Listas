@@ -84,7 +84,7 @@
         </div>
       </section>
 
-      <!-- BARRA DE CÓDIGO DA LISTA -->
+      <!-- BARRA DE CÓDIGO DA LISTA (RESTAURADA) -->
       <section class="bg-white rounded-3xl p-4 shadow-xs border border-slate-100 mb-4 flex items-center justify-between">
         <div>
           <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Código de Sincronização</span>
@@ -308,7 +308,7 @@
   <!-- TOAST NOTIFICADOR -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-3.5 rounded-2xl shadow-xl flex items-center gap-2 max-w-xs transition-all duration-300 opacity-0 pointer-events-none">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toast-message">Mensagem do sistema</span>
+    <span id="toast-message">Mensagem do system</span>
   </div>
 
   <!-- CORE SCRIPT IMPORTANTE -->
@@ -631,7 +631,7 @@
       if (existingItem) {
         // Se já existe e não está comprado, incrementa a quantidade
         existingItem.qty += 1;
-        window.showToast(`Adicionada mais 1 unidade de "${name}"`);
+        window.showToast("Adicionada mais 1 unidade de " + name);
       } else {
         // Caso contrário, adiciona de raiz à lista
         const newItem = {
@@ -645,7 +645,7 @@
           addedAt: Date.now()
         };
         listData.items.unshift(newItem);
-        window.showToast(`"${name}" enviado para a Lista de Compras!`);
+        window.showToast(name + " enviado para a Lista de Compras!");
       }
 
       saveListToFirebase();
@@ -814,15 +814,15 @@
             `;
           });
 
-          html += `</div></div>`;
+          html += "</div></div>";
         }
       });
 
       container.innerHTML = html;
 
-      document.getElementById('cart-progress').innerText = `${checkedCount} de ${listData.items.length}`;
+      document.getElementById('cart-progress').innerText = checkedCount + " de " + listData.items.length;
       const progressPercent = Math.round((checkedCount / listData.items.length) * 100);
-      document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+      document.getElementById('progress-bar').style.width = progressPercent + "%";
 
       if (checkedCount > 0) {
         clearBtn.classList.remove('hidden');
@@ -832,8 +832,8 @@
 
       if (totalEst > 0) {
         document.getElementById('cost-summary').classList.remove('hidden');
-        document.getElementById('total-estimated').innerText = `€ ${totalEst.toFixed(2)}`;
-        document.getElementById('total-checked').innerText = `€ ${totalChecked.toFixed(2)}`;
+        document.getElementById('total-estimated').innerText = "€ " + totalEst.toFixed(2);
+        document.getElementById('total-checked').innerText = "€ " + totalChecked.toFixed(2);
       } else {
         document.getElementById('cost-summary').classList.add('hidden');
       }
@@ -885,7 +885,7 @@
       resultsGrid.classList.add('hidden');
       resultsGrid.innerHTML = '';
       
-      window.showToast(`"${newItem.name}" adicionado!`);
+      window.showToast(newItem.name + " adicionado!");
     });
 
     window.toggleItemCheck = function(itemId) {
@@ -936,7 +936,7 @@
       window.location.hash = codeInput;
       document.getElementById('join-code-input').value = '';
       initListConnection();
-      window.showToast(`Ligou-se à lista: ${codeInput}!`);
+      window.showToast("Ligou-se à lista: " + codeInput + "!");
     };
 
     window.copyCode = function() {
@@ -966,9 +966,9 @@
       const actualToken = authToken;
 
       let finalHtml = "<!DOCTYPE html>\n<html lang=\"pt\">\n" + currentHtml + "\n</html>";
-      finalHtml = finalHtml.replace('const EMBEDDED_CONFIG = null;', `const EMBEDDED_CONFIG = ${actualConfig};`);
-      finalHtml = finalHtml.replace('const EMBEDDED_APP_ID = null;', `const EMBEDDED_APP_ID = "${actualAppId}";`);
-      finalHtml = finalHtml.replace('const EMBEDDED_AUTH_TOKEN = null;', `const EMBEDDED_AUTH_TOKEN = "${actualToken}";`);
+      finalHtml = finalHtml.replace('const EMBEDDED_CONFIG = null;', 'const EMBEDDED_CONFIG = ' + actualConfig + ';');
+      finalHtml = finalHtml.replace('const EMBEDDED_APP_ID = null;', 'const EMBEDDED_APP_ID = "' + actualAppId + '";');
+      finalHtml = finalHtml.replace('const EMBEDDED_AUTH_TOKEN = null;', 'const EMBEDDED_AUTH_TOKEN = "' + actualToken + '";');
       return finalHtml;
     };
 
@@ -1002,7 +1002,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Lista_de_Compras_Sincronizada.html`;
+        a.download = "Lista_de_Compras_Sincronizada.html";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1026,7 +1026,7 @@
       userName = nameVal;
       safeStorage.setItem('shopping_user_name', nameVal);
       document.getElementById('name-modal').classList.add('hidden');
-      window.showToast(`Identidade guardada: ${nameVal}!`);
+      window.showToast("Identidade guardada: " + nameVal + "!");
       renderItems(); // Re-render para mostrar autor atualizado
     };
 
